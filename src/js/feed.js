@@ -22,7 +22,6 @@ function sendData(){
   }).then(function(res){
     console.log('data sent successfully', res);
 
-    console.log('test');
     var url = 'https://pwagram-90958.firebaseio.com/posts.json';
     var isNetworkDataRecieved = false;
 
@@ -33,9 +32,11 @@ function sendData(){
       .then(function(data) {
         console.log('from feed web', data);
         isNetworkDataRecieved = true;
+        clearAllData('posts');
         var dataArray = [];
         for(var key in data) {
           if(data[key]) {
+            writeData('posts', data[key]);
             dataArray.push(data[key]);
           }
         }
@@ -168,8 +169,12 @@ form.addEventListener('submit', function(event) {
       writeData('sync-posts', post)
       .then(function(){
         console.log('sync register');
-        sw.sync.register('new-post-request') .then(function(){
-          console.log('hohoyi');
+        return sw.sync.register('new-post-request')
+        .then(function(status){
+          console.log('success');
+        })
+        .catch(function(err){
+          console.log('failed', err);
         });
       })
       .then(function(status){

@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
-var STATIC_CACHE = 'static-v54';
-var DYNAMIC_CACHE = 'dynamic-v4';
+var STATIC_CACHE = 'static-v61';
+var DYNAMIC_CACHE = 'dynamic-v9';
 var STATIC_FILES = [
   '/',
   '/index.html',
@@ -143,7 +143,8 @@ self.addEventListener('fetch', function(event){
 //   );
 // });
 
-self.addEventListener('sync', function(event) {
+self.onsync = function(event) {
+  console.log('syncc');
   console.log('[service worker] BAckground Syncing', event);
   if(event.tag == 'new-post-request') {
     event.waitUntil(
@@ -174,4 +175,4 @@ self.addEventListener('sync', function(event) {
       })
     )
   }
-})
+}
