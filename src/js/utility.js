@@ -44,4 +44,3 @@ function deleteItemFromData(storeName, id) {
     return tx.complete;
   });
 }
-

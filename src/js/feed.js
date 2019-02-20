@@ -5,6 +5,10 @@ var sharedMomentsArea = document.querySelector('#shared-moments');
 var form = document.querySelector('form');
 var postTitle = document.querySelector('#title');
 var postLocation = document.querySelector('#location');
+navigator.serviceWorker.ready.then(function(swRegistration) {
+  console.log('inside sync register');
+  return swRegistration.sync.register('new-post-request');
+});
 
 function sendData(){
   fetch('https://pwagram-90958.firebaseio.com/posts.json', {
@@ -161,22 +165,13 @@ form.addEventListener('submit', function(event) {
   if('serviceWorker' in navigator && 'SyncManager' in window) {
     navigator.serviceWorker.ready
     .then(function(sw){
+
       var post = {
         id: new Date().toISOString(),
         title: postTitle.value,
         location: postLocation.value
       }
       writeData('sync-posts', post)
-      .then(function(){
-        console.log('sync register');
-        return sw.sync.register('new-post-request')
-        .then(function(status){
-          console.log('success');
-        })
-        .catch(function(err){
-          console.log('failed', err);
-        });
-      })
       .then(function(status){
         var snackbarContainer = document.querySelector('#confirmation-toast');
         var data = { message: 'your post was saved for syncing'};

@@ -1,6 +1,6 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
-var STATIC_CACHE = 'static-v61';
+var STATIC_CACHE = 'static-v65';
 var DYNAMIC_CACHE = 'dynamic-v9';
 var STATIC_FILES = [
   '/',
@@ -64,6 +64,40 @@ self.addEventListener('activate', function(event) {
     })
   );
   return self.clients.claim();
+});
+
+self.addEventListener('sync', function(event) {
+  console.log('syncc');
+  console.log('[service worker] BAckground Syncing', event);
+  if(event.tag == 'new-post-request') {
+    event.waitUntil(
+      readAllData('sync-posts')
+      .then(function(data) {
+        for(var dt of data) {
+          if(dt) {
+            fetch('https://pwagram-90958.firebaseio.com/posts.json', {
+              method: 'POST',
+              headers: {
+                'content-type': 'application/json',
+                'accept': 'application/json'
+              },
+              body: JSON.stringify({
+                id: dt.id,
+                title: dt.title,
+                location: dt.location,
+                image: '"https://firebasestorage.googleapis.com/v0/b/pwagram-90958.appspot.com/o/north.jpg?alt=media&token=3f661d33-e401-499d-ac7c-3023e2ae1085"'
+              })
+            }).then(function(res){
+              console.log('[service worker] data sent successfully', res);
+              if(res.ok) {
+                deleteItemFromData('sync-posts', dt.id);
+              }
+            });
+          }
+        }
+      })
+    )
+  }
 });
 
 self.addEventListener('fetch', function(event){
@@ -143,36 +177,3 @@ self.addEventListener('fetch', function(event){
 //   );
 // });
 
-self.onsync = function(event) {
-  console.log('syncc');
-  console.log('[service worker] BAckground Syncing', event);
-  if(event.tag == 'new-post-request') {
-    event.waitUntil(
-      readAllData('sync-posts')
-      .then(function(data) {
-        for(var dt of data) {
-          if(dt) {
-            fetch('https://pwagram-90958.firebaseio.com/posts.json', {
-              method: 'POST',
-              headers: {
-                'content-type': 'application/json',
-                'accept': 'application/json'
-              },
-              body: JSON.stringify({
-                id: dt.id,
-                title: dt.title,
-                location: dt.location,
-                image: '"https://firebasestorage.googleapis.com/v0/b/pwagram-90958.appspot.com/o/north.jpg?alt=media&token=3f661d33-e401-499d-ac7c-3023e2ae1085"'
-              })
-            }).then(function(res){
-              console.log('[service worker] data sent successfully', res);
-              if(res.ok) {
-                deleteItemFromData('sync-posts', dt.id);
-              }
-            });
-          }
-        }
-      })
-    )
-  }
-}
